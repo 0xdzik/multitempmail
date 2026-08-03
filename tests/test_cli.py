@@ -1,4 +1,4 @@
-"""Tests for the tempmail CLI (argparse, mocked HTTP, temp sessions)."""
+"""Tests for the multitempmail CLI (argparse, mocked HTTP, temp sessions)."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import json
 
 from conftest import Router, json_response, make_http
 
-from tempmail import cli
-from tempmail.client import TempMailClient
+from multitempmail import cli
+from multitempmail.client import TempMailClient
 
 
 def _mock_client(monkeypatch, provider_name: str, router: Router) -> TempMailClient:

@@ -4,7 +4,7 @@ Guidance for AI coding agents working on this repository.
 
 ## Project Overview
 
-`tempmail-api` (import name `tempmail`) is a unified Python SDK for
+`multitempmail` is a unified Python SDK for
 multiple temporary email providers. Users interact with a single API while
 the SDK transparently handles provider implementations.
 
@@ -24,7 +24,7 @@ Key features:
   (`ABC123`) patterns with false-positive guards, custom regex support
 - **verification link extraction** — first link, `domain=` / `keyword=`
   filters, custom `filter=` callbacks
-- **CLI** — `tempmail create/inbox/read/otp/wait/delete/providers/domains/health`
+- **CLI** — `multitempmail create/inbox/read/otp/wait/delete/providers/domains/health`
 - **session persistence** — `save_session` / `load_session` /
   `restore_session` (JSON)
 - **response cache** — optional TTL-based `ResponseCache`, auto-invalidated
@@ -34,7 +34,7 @@ Key features:
 ## Architecture
 
 ```
-tempmail/
+multitempmail/
 ├── client.py        # TempMailClient facade (pool, sessions, delegations)
 ├── base.py          # BaseProvider, ProviderInfo, registry (register/get_provider)
 ├── providers/       # one module per provider — provider-specific code ONLY
@@ -77,15 +77,15 @@ core modules and must not be re-implemented in a provider.
 
 ## How to Add a New Provider
 
-1. Create `tempmail/providers/<name>.py` with a class inheriting from
+1. Create `multitempmail/providers/<name>.py` with a class inheriting from
    `BaseProvider` (see `mailcx.py` for a compact example).
 2. Declare metadata: `name`, `display_name`, `base_url`, `capabilities`
    (`frozenset` of `Cap` values), `default_priority`, `known_domains`.
 3. Implement **documented endpoints only** — read the provider's API docs;
    never invent or guess undocumented behavior (e.g. ambiguous response
    shapes are parsed defensively).
-4. Register the provider: `from tempmail import register; @register(...)`.
-   Import the module from `tempmail/providers/__init__.py`.
+4. Register the provider: `from multitempmail import register; @register(...)`.
+   Import the module from `multitempmail/providers/__init__.py`.
 5. Add tests in `tests/test_<name>.py` using the mocked-HTTP helpers from
    `tests/conftest.py` (`Router`, `json_response`, `make_http`) — no real
    network calls.
@@ -104,31 +104,28 @@ automatically.
   and error codes must come from provider documentation
 - **keep the public API backward compatible** — no signature removals, no
   behavior changes without a deprecation path
-- **use type hints** everywhere (mypy-strict on `tempmail/`)
+- **use type hints** everywhere (mypy-strict on `multitempmail/`)
 - **keep tests passing** — `python -m pytest` must stay green
 - **use the shared HTTP client** — `self._request(...)` / `HTTPClient`
   only; no bare `httpx` calls in providers
 - **follow Ruff, Black and mypy** — `ruff check .`, `black --check .`,
-  `mypy tempmail` must all pass; config lives in `pyproject.toml`
+  `mypy multitempmail` must all pass; config lives in `pyproject.toml`
   (line-length 100, py310 target)
 
 ## Installation
 
 ```bash
-pip install tempmail-api
+pip install multitempmail
 ```
 
-Import name is `tempmail` (the distribution name differs from the import
-namespace on purpose):
-
 ```python
-from tempmail import TempMailClient
+from multitempmail import TempMailClient
 ```
 
 ## Quick Example
 
 ```python
-from tempmail import TempMailClient
+from multitempmail import TempMailClient
 
 client = TempMailClient("mailtm")
 mailbox = client.create()
@@ -145,7 +142,7 @@ print(f"code: {otp}")
 CLI:
 
 ```bash
-tempmail create --provider catchmail --save session.json
-tempmail otp --timeout 60 --session session.json
-tempmail inbox --session session.json
+multitempmail create --provider catchmail --save session.json
+multitempmail otp --timeout 60 --session session.json
+multitempmail inbox --session session.json
 ```

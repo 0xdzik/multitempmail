@@ -7,8 +7,8 @@ import time
 import httpx
 import pytest
 
-from tempmail import get_provider
-from tempmail.errors import AuthenticationError, UnsupportedFeature
+from multitempmail import get_provider
+from multitempmail.errors import AuthenticationError, UnsupportedFeature
 from tests.conftest import Router, json_response, make_http, request_body
 
 

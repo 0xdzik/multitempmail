@@ -6,7 +6,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tempmail.http import HTTPClient
+from multitempmail.http import HTTPClient
 
 RETRY_BACKOFF = 0.01
 

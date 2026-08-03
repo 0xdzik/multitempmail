@@ -1,10 +1,10 @@
-"""tempmail — a unified SDK for temporary email providers.
+"""multitempmail — a unified SDK for temporary email providers.
 
 Supported providers: mail.tm, catchmail.io, tempmail.lol, mail.cx, mail.td.
 
 Quickstart::
 
-    from tempmail import TempMailClient
+    from multitempmail import TempMailClient
 
     client = TempMailClient()          # every provider, automatic failover
     mailbox = client.create()

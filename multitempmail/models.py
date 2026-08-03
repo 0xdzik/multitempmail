@@ -326,7 +326,7 @@ class Mailbox:
         """Wait for a new message containing an OTP and return it.
 
         ``pattern`` overrides the default OTP patterns (see
-        :func:`tempmail.utils.extract_otp`). ``sender``/``subject`` narrow
+        :func:`multitempmail.utils.extract_otp`). ``sender``/``subject`` narrow
         the candidate messages. Raises TimeoutError.
         """
 
@@ -360,7 +360,7 @@ class Mailbox:
         """Wait for a new message containing a URL and return it.
 
         ``keyword``/``domain``/``filter`` filter the URLs (see
-        :func:`tempmail.utils.extract_link`), ``sender``/``subject`` narrow
+        :func:`multitempmail.utils.extract_link`), ``sender``/``subject`` narrow
         the candidate messages. Raises TimeoutError.
         """
 

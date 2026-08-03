@@ -3,14 +3,14 @@ requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tempmail-api"
+name = "multitempmail"
 version = "0.2.0"
 description = "Unified SDK for temporary email providers (mail.tm, catchmail.io, tempmail.lol, mail.cx, mail.td)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-keywords = ["tempmail", "disposable-email", "temporary-email", "email", "sdk"]
+keywords = ["multitempmail", "temporary-email", "disposable-email", "email", "sdk"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -27,11 +27,16 @@ dependencies = ["httpx>=0.26"]
 dev = ["pytest>=7", "pytest-cov>=4", "ruff", "black", "mypy"]
 
 [project.scripts]
-tempmail = "tempmail.cli:main"
-tempmail-api = "tempmail.cli:main"
+multitempmail = "multitempmail.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/0xdzik/multitempmail"
+Documentation = "https://github.com/0xdzik/multitempmail/blob/main/README.md"
+Repository = "https://github.com/0xdzik/multitempmail"
+Issues = "https://github.com/0xdzik/multitempmail/issues"
 
 [tool.setuptools.packages.find]
-include = ["tempmail*"]
+include = ["multitempmail*"]
 
 [tool.ruff]
 line-length = 100

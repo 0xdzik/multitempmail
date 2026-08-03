@@ -5,9 +5,9 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tempmail import TempMailClient, get_provider, list_providers
-from tempmail.caps import Cap
-from tempmail.errors import TempMailError
+from multitempmail import TempMailClient, get_provider, list_providers
+from multitempmail.caps import Cap
+from multitempmail.errors import TempMailError
 from tests.conftest import Router, json_response, make_http
 
 

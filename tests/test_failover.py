@@ -5,10 +5,10 @@ from __future__ import annotations
 import pytest
 from conftest import Router, json_response, make_http
 
-from tempmail.base import get_provider
-from tempmail.errors import AuthenticationError, TempMailError
-from tempmail.failover import FailoverError, ProviderPool
-from tempmail.health import HealthManager
+from multitempmail.base import get_provider
+from multitempmail.errors import AuthenticationError, TempMailError
+from multitempmail.failover import FailoverError, ProviderPool
+from multitempmail.health import HealthManager
 
 _BASES = {
     "mailtm": "https://api.mail.tm",
@@ -152,7 +152,7 @@ def test_success_recovers_ordering() -> None:
 
 
 def test_client_pool_default_orders_by_priority() -> None:
-    from tempmail.client import TempMailClient
+    from multitempmail.client import TempMailClient
 
     client = TempMailClient()
     assert client.name == "mailtm"
@@ -181,7 +181,7 @@ def test_client_create_fails_over_with_mocked_http() -> None:
             {"system_domains": [{"domain": "cx.io", "default": True}], "local_part_rules": {}},
         )
 
-    from tempmail.client import TempMailClient
+    from multitempmail.client import TempMailClient
 
     client = TempMailClient(
         [

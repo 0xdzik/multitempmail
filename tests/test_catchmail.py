@@ -5,8 +5,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tempmail import get_provider
-from tempmail.errors import UnsupportedFeature
+from multitempmail import get_provider
+from multitempmail.errors import UnsupportedFeature
 from tests.conftest import Router, json_response, make_http
 
 
@@ -101,7 +101,7 @@ def test_delete_message(router: Router, provider):
 
 
 def test_download_attachment(router: Router, provider):
-    from tempmail.models import Attachment
+    from multitempmail.models import Attachment
 
     @router.on("GET", "/files/at1")
     def file(request):

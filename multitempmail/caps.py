@@ -1,9 +1,9 @@
 """Provider capability identifiers.
 
 Every provider declares the subset of capabilities it implements as
-:attr:`tempmail.base.BaseProvider.capabilities`. Query them with
+:attr:`multitempmail.base.BaseProvider.capabilities`. Query them with
 ``provider.supports(Cap.X)`` / ``mailbox.supports(Cap.X)``; attempting an
-unsupported operation raises :class:`tempmail.errors.UnsupportedFeature`.
+unsupported operation raises :class:`multitempmail.errors.UnsupportedFeature`.
 """
 
 __all__ = ["Cap"]

@@ -7,9 +7,9 @@ import json
 import pytest
 from conftest import Router, json_response, make_http
 
-from tempmail.base import get_provider
-from tempmail.client import TempMailClient
-from tempmail.session import SESSION_VERSION, load_session
+from multitempmail.base import get_provider
+from multitempmail.client import TempMailClient
+from multitempmail.session import SESSION_VERSION, load_session
 
 
 def test_save_load_catchmail_mailbox(tmp_path) -> None:
@@ -81,7 +81,7 @@ def test_restore_session_in_place(tmp_path) -> None:
 
 
 def test_missing_mailbox_provider_raises(tmp_path) -> None:
-    from tempmail.session import save_session
+    from multitempmail.session import save_session
 
     path = tmp_path / "session.json"
     client = TempMailClient("catchmail")
@@ -92,7 +92,7 @@ def test_missing_mailbox_provider_raises(tmp_path) -> None:
 
 
 def test_module_level_save_load(tmp_path) -> None:
-    from tempmail.session import save_session
+    from multitempmail.session import save_session
 
     path = tmp_path / "s.json"
     save_session(str(path), providers=["catchmail"], options={"timeout": 12.5})

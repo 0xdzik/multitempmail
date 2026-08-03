@@ -6,8 +6,8 @@ import time
 
 from conftest import Router, json_response, make_http
 
-from tempmail.base import get_provider
-from tempmail.cache import ResponseCache
+from multitempmail.base import get_provider
+from multitempmail.cache import ResponseCache
 
 
 def test_get_miss_then_set() -> None:

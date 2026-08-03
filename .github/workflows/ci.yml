@@ -34,7 +34,7 @@ jobs:
         run: black --check .
 
       - name: mypy (types)
-        run: mypy tempmail
+        run: mypy multitempmail
 
       - name: pytest (tests + coverage)
-        run: pytest --cov=tempmail --cov-report=term-missing --cov-fail-under=85
+        run: pytest --cov=multitempmail --cov-report=term-missing --cov-fail-under=85

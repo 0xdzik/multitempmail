@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from tempmail import get_provider
-from tempmail.errors import TimeoutError
+from multitempmail import get_provider
+from multitempmail.errors import TimeoutError
 from tests.conftest import Router, json_response, make_http
 
 

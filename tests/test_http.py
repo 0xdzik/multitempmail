@@ -5,8 +5,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tempmail import errors
-from tempmail.http import DEFAULT_USER_AGENT, HTTPClient
+from multitempmail import errors
+from multitempmail.http import DEFAULT_USER_AGENT, HTTPClient
 from tests.conftest import Router, make_http
 
 

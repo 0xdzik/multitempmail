@@ -106,7 +106,7 @@ class TempMailClient:
         through (``domain=``, ``local_part=``, ``password=``, ``prefix=``...).
 
         With a multi-provider pool, transient failures fail over to the
-        next provider until one succeeds (see :class:`~tempmail.failover`).
+        next provider until one succeeds (see :class:`~multitempmail.failover`).
         """
         mailbox = self.pool.create(**kwargs)
         self._active = mailbox
@@ -212,25 +212,25 @@ class TempMailClient:
         return mailbox.download(message, attachment)
 
     def wait_for_message(self, mailbox: Mailbox, *args: Any, **kwargs: Any) -> Message:
-        """See :meth:`tempmail.models.Mailbox.wait_for_message`."""
+        """See :meth:`multitempmail.models.Mailbox.wait_for_message`."""
         return mailbox.wait_for_message(*args, **kwargs)
 
     def wait_for_subject(self, mailbox: Mailbox, *args: Any, **kwargs: Any) -> Message:
-        """See :meth:`tempmail.models.Mailbox.wait_for_subject`."""
+        """See :meth:`multitempmail.models.Mailbox.wait_for_subject`."""
         return mailbox.wait_for_subject(*args, **kwargs)
 
     def wait_for_sender(self, mailbox: Mailbox, *args: Any, **kwargs: Any) -> Message:
-        """See :meth:`tempmail.models.Mailbox.wait_for_sender`."""
+        """See :meth:`multitempmail.models.Mailbox.wait_for_sender`."""
         return mailbox.wait_for_sender(*args, **kwargs)
 
     def wait_for_otp(self, mailbox: Mailbox, *args: Any, **kwargs: Any) -> str:
-        """See :meth:`tempmail.models.Mailbox.wait_for_otp`."""
+        """See :meth:`multitempmail.models.Mailbox.wait_for_otp`."""
         return mailbox.wait_for_otp(*args, **kwargs)
 
     def wait_for_link(self, mailbox: Mailbox, *args: Any, **kwargs: Any) -> str:
-        """See :meth:`tempmail.models.Mailbox.wait_for_link`."""
+        """See :meth:`multitempmail.models.Mailbox.wait_for_link`."""
         return mailbox.wait_for_link(*args, **kwargs)
 
     def wait_until(self, mailbox: Mailbox, *args: Any, **kwargs: Any) -> Any:
-        """See :meth:`tempmail.models.Mailbox.wait_until`."""
+        """See :meth:`multitempmail.models.Mailbox.wait_until`."""
         return mailbox.wait_until(*args, **kwargs)

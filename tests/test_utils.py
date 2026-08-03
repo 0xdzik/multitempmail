@@ -1,11 +1,11 @@
-"""Unit tests for tempmail.utils: OTP/link extraction and helpers."""
+"""Unit tests for multitempmail.utils: OTP/link extraction and helpers."""
 
 from __future__ import annotations
 
 import re
 from datetime import datetime, timezone
 
-from tempmail.utils import (
+from multitempmail.utils import (
     extract_link,
     extract_links,
     extract_otp,

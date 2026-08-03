@@ -1,4 +1,4 @@
-"""Exception hierarchy for the tempmail SDK.
+"""Exception hierarchy for the multitempmail SDK.
 
 All provider-specific failures are raised as :class:`TempMailError`
 subclasses so callers can catch a single base type. HTTP failures are

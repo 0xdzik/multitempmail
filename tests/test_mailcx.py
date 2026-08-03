@@ -5,7 +5,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tempmail import get_provider
+from multitempmail import get_provider
 from tests.conftest import Router, json_response, make_http
 
 CONFIG = {
@@ -138,7 +138,7 @@ def test_delete_message_and_clear_mailbox(router: Router, provider):
 
 
 def test_download_attachment_by_index(router: Router, provider):
-    from tempmail.models import Attachment
+    from multitempmail.models import Attachment
 
     @router.on("GET", "/v1/email/e1/attachments/1")
     def attachment(request):

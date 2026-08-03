@@ -1,5 +1,5 @@
 """Provider plugins. Importing this package registers every provider with
-the registry (see :func:`tempmail.get_provider`)."""
+the registry (see :func:`multitempmail.get_provider`)."""
 
 from __future__ import annotations
 

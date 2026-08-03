@@ -5,8 +5,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tempmail import get_provider
-from tempmail.errors import AuthenticationError, MailboxExpired
+from multitempmail import get_provider
+from multitempmail.errors import AuthenticationError, MailboxExpired
 from tests.conftest import Router, json_response, make_http, request_body
 
 DOMAINS = {
@@ -181,7 +181,7 @@ def test_delete_mailbox_404_becomes_mailbox_expired(router: Router, provider):
 
 
 def test_download_attachment_by_index(router: Router, provider):
-    from tempmail.models import Attachment
+    from multitempmail.models import Attachment
 
     @router.on("GET", "/api/accounts/acc-uuid/messages/m1/attachments/2")
     def attachment(request):

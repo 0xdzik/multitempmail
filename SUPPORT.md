@@ -1,20 +1,20 @@
 # Support
 
 The fastest way to report problems or request features is the
-[GitHub issue tracker](https://github.com/0xdzik/tempmail-api/issues).
+[GitHub issue tracker](https://github.com/0xdzik/multitempmail/issues).
 
 ## Before opening an issue
 
 - Check the [README](README.md) — especially the support matrix and the
   error table — in case the behavior you hit is documented.
-- Reproduce with the latest version: `pip install --upgrade tempmail-api`.
+- Reproduce with the latest version: `pip install --upgrade multitempmail`.
 
 ## Bug reports
 
 Include:
 
 - Python version and OS (`python --version`),
-- package version (`pip show tempmail-api`),
+- package version (`pip show multitempmail`),
 - the minimal code snippet that reproduces the problem,
 - the full traceback / error message.
 
@@ -37,10 +37,9 @@ with its API documentation URL. Adding a provider requires only a
 
 ## Installation issues
 
-- `pip install tempmail-api` requires Python ≥ 3.10 and `httpx`.
-- Import name is `tempmail` (the distribution name is `tempmail-api`):
-  `from tempmail import TempMailClient`.
-- If `tempmail` or `tempmail-api` console commands are missing after
+- `pip install multitempmail` requires Python ≥ 3.10 and `httpx`.
+- Import as `from multitempmail import TempMailClient`.
+- If the `multitempmail` console command is missing after
   install, your `Scripts`/`bin` directory is probably not on `PATH`.
 
 ## CLI issues
@@ -48,7 +47,7 @@ with its API documentation URL. Adding a provider requires only a
 - Sessions: commands read `session.json` by default; `create` writes it
   with `--save`. If a command complains about a missing session, create
   one first or pass an existing `--session` file.
-- Use `tempmail <command> --help` for exact flags.
+- Use `multitempmail <command> --help` for exact flags.
 - Verbose failures: run the same operation in Python with the SDK for a
   full traceback.
 

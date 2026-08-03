@@ -5,8 +5,8 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from tempmail import get_provider
-from tempmail.errors import AuthenticationError, MailboxExpired
+from multitempmail import get_provider
+from multitempmail.errors import AuthenticationError, MailboxExpired
 from tests.conftest import Router, json_response, make_http, request_body
 
 DOMAINS = {
@@ -229,7 +229,7 @@ def test_delete_mailbox_404_becomes_mailbox_expired(router: Router, provider):
 
 
 def test_download_attachment_relative_and_absolute(router: Router, provider):
-    from tempmail.models import Attachment
+    from multitempmail.models import Attachment
 
     relative = Attachment(filename="r.txt", download_url="/files/r")
     absolute = Attachment(filename="a.txt", download_url="https://cdn.example.test/a")
@@ -248,7 +248,7 @@ def test_download_attachment_relative_and_absolute(router: Router, provider):
 
 
 def test_operations_require_token(provider):
-    from tempmail.models import Mailbox
+    from multitempmail.models import Mailbox
 
     mailbox = Mailbox(provider="mailtm", address="u@public.two")
     with pytest.raises(AuthenticationError):

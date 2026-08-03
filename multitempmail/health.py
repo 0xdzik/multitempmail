@@ -16,7 +16,7 @@ from typing import Any
 
 __all__ = ["HealthManager", "HealthSnapshot"]
 
-#: callback signature consumed by :class:`tempmail.http.HTTPClient` —
+#: callback signature consumed by :class:`multitempmail.http.HTTPClient` —
 #: ``(success, elapsed_seconds)``
 HealthCallback = Callable[[bool, float], None]
 

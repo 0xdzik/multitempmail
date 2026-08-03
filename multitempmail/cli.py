@@ -1,4 +1,4 @@
-"""Command-line interface: ``tempmail``.
+"""Command-line interface: ``multitempmail``.
 
 Reuses the SDK exclusively (``TempMailClient``, sessions, wait helpers);
 no provider logic is duplicated here.
@@ -179,7 +179,7 @@ def cmd_health(client: TempMailClient, args: argparse.Namespace) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="tempmail",
+        prog="multitempmail",
         description="Temporary email SDK — unified CLI across providers.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
@@ -265,10 +265,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             client = _client_for(session, args.provider) if session else TempMailClient()
             args.func(client, args)
     except TempMailError as exc:
-        print(f"tempmail: error: {exc}", file=sys.stderr)
+        print(f"multitempmail: error: {exc}", file=sys.stderr)
         return 1
     except ValueError as exc:
-        print(f"tempmail: error: {exc}", file=sys.stderr)
+        print(f"multitempmail: error: {exc}", file=sys.stderr)
         return 1
     return 0
 

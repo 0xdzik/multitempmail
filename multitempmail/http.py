@@ -2,7 +2,7 @@
 
 Built on httpx with sane defaults — timeouts, retries with exponential
 backoff for idempotent requests, optional proxy, custom User-Agent — and a
-unified mapping of HTTP failures into :mod:`tempmail.errors`.
+unified mapping of HTTP failures into :mod:`multitempmail.errors`.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import httpx
 
 from . import __version__, errors
 
-DEFAULT_USER_AGENT = f"tempmail-sdk/{__version__}"
+DEFAULT_USER_AGENT = f"multitempmail-sdk/{__version__}"
 
 #: statuses retried with backoff when retries are enabled
 _RETRYABLE_STATUS = frozenset({408, 425, 429, 500, 502, 503, 504})
@@ -35,7 +35,7 @@ class HTTPClient:
             retryable status (408/425/429/5xx) or a transport error.
         retry_backoff: base backoff in seconds, doubled after every attempt.
         proxy: optional proxy URL passed through to httpx.
-        user_agent: ``User-Agent`` header (defaults to ``tempmail-sdk/x.y.z``).
+        user_agent: ``User-Agent`` header (defaults to ``multitempmail-sdk/x.y.z``).
         headers: extra headers merged into every request.
         transport: optional httpx transport (used by tests to mock HTTP).
         metrics: optional ``(success, elapsed_seconds)`` callback invoked
@@ -95,7 +95,7 @@ class HTTPClient:
     ) -> httpx.Response:
         """Perform a request and return the response.
 
-        Raises a :class:`tempmail.errors.TempMailError` subclass for
+        Raises a :class:`multitempmail.errors.TempMailError` subclass for
         HTTP >= 400 responses or transport failures.
         """
         timeout = self.timeout if timeout is None else timeout

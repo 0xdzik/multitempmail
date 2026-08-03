@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from tempmail.health import HealthManager
+from multitempmail.health import HealthManager
 
 
 def test_unknown_provider_is_healthy() -> None:

@@ -1,16 +1,16 @@
-# tempmail-api
+# multitempmail
 
-[![CI](https://github.com/0xdzik/tempmail-api/actions/workflows/ci.yml/badge.svg)](https://github.com/0xdzik/tempmail-api/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/tempmail-api.svg)](https://pypi.org/project/tempmail-api/)
-[![Python](https://img.shields.io/pypi/pyversions/tempmail-api.svg)](https://pypi.org/project/tempmail-api/)
-[![License](https://img.shields.io/pypi/l/tempmail-api.svg)](https://github.com/0xdzik/tempmail-api/blob/main/LICENSE)
+[![CI](https://github.com/0xdzik/multitempmail/actions/workflows/ci.yml/badge.svg)](https://github.com/0xdzik/multitempmail/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/multitempmail.svg)](https://pypi.org/project/multitempmail/)
+[![Python](https://img.shields.io/pypi/pyversions/multitempmail.svg)](https://pypi.org/project/multitempmail/)
+[![License](https://img.shields.io/pypi/l/multitempmail.svg)](https://github.com/0xdzik/multitempmail/blob/main/LICENSE)
 
 A production-oriented Python SDK for temporary email providers: one
 consistent API, five providers, no per-provider boilerplate.
 
 ## Project Overview
 
-`tempmail-api` is a unified Python SDK that lets you use temporary email
+`multitempmail` is a unified Python SDK that lets you use temporary email
 providers through a single API. You interact with one facade
 (`TempMailClient`) and one mailbox model; the SDK transparently handles
 the provider behind the scenes — including automatic failover when a
@@ -37,7 +37,7 @@ Highlights:
   auto-invalidated on write operations
 - **session persistence** — save and restore your client and mailbox as
   JSON
-- **CLI** — `tempmail` / `tempmail-api` commands for the most common
+- **CLI** — the `multitempmail` command for the most common
   operations, no extra dependencies
 
 The provider list:
@@ -59,15 +59,15 @@ models, a capability system and one consistent error hierarchy.
 ## Install
 
 ```bash
-pip install tempmail-api
+pip install multitempmail
 pip install -e .[dev]               # from this checkout
 ```
 
-The distribution name is `tempmail-api`; the import name stays `tempmail`
-on purpose:
+The distribution name and import namespace are one and the same:
+`pip install multitempmail` then `from multitempmail import TempMailClient`.
 
 ```python
-from tempmail import TempMailClient
+from multitempmail import TempMailClient
 ```
 
 Requires Python ≥ 3.10. Runtime dependency: `httpx` only.
@@ -77,7 +77,7 @@ Requires Python ≥ 3.10. Runtime dependency: `httpx` only.
 Create a mailbox, read messages and wait for a one-time code:
 
 ```python
-from tempmail import TempMailClient
+from multitempmail import TempMailClient
 
 client = TempMailClient("mailtm")          # default provider is mail.tm
 mailbox = client.create()
@@ -98,9 +98,9 @@ print(otp)                                  # e.g. 483920
 Or use the CLI for the same flow:
 
 ```bash
-tempmail create --provider catchmail --save session.json
-tempmail inbox --session session.json
-tempmail otp --timeout 60 --session session.json
+multitempmail create --provider catchmail --save session.json
+multitempmail inbox --session session.json
+multitempmail otp --timeout 60 --session session.json
 ```
 
 ## Providers
@@ -202,7 +202,7 @@ its `AuthenticationError`; a mail.td pool with no `api_key` just moves on).
 Optional in-memory cache (TTL-based, thread-safe):
 
 ```python
-from tempmail import ResponseCache
+from multitempmail import ResponseCache
 
 client = TempMailClient(cache=ResponseCache(default_ttl=30))
 messages = mailbox.messages()      # cached for 30s
@@ -235,20 +235,20 @@ mailbox (provider names, jsonable options, address/token/password).
 
 ## CLI
 
-The package ships `tempmail` and `tempmail-api` console commands (same
-CLI, no extra dependencies):
+The package ships a `multitempmail` console command (no extra
+dependencies):
 
 ```bash
-tempmail create --provider catchmail --save session.json
-tempmail inbox --session session.json
-tempmail read <message-id> --session session.json
-tempmail otp --timeout 60 --session session.json
-tempmail wait --subject confirm --session session.json
-tempmail wait --otp --timeout 60 --session session.json
-tempmail delete <message-id> --session session.json
-tempmail providers --json
-tempmail domains --provider mailtm --json
-tempmail health --json
+multitempmail create --provider catchmail --save session.json
+multitempmail inbox --session session.json
+multitempmail read <message-id> --session session.json
+multitempmail otp --timeout 60 --session session.json
+multitempmail wait --subject confirm --session session.json
+multitempmail wait --otp --timeout 60 --session session.json
+multitempmail delete <message-id> --session session.json
+multitempmail providers --json
+multitempmail domains --provider mailtm --json
+multitempmail health --json
 ```
 
 `create` writes a session file (default `session.json`); the other
@@ -259,7 +259,7 @@ logic.
 ## Wait helpers
 
 All helpers wait **only for mail that arrives after the call**, and raise
-`TimeoutError` (from `tempmail.errors`) on expiry. Providers with a
+`TimeoutError` (from `multitempmail.errors`) on expiry. Providers with a
 server-side long-poll (tempmail.lol `/wait`, mail.cx 25s hold) use it;
 others poll at `interval` seconds (default 2s).
 
@@ -317,7 +317,7 @@ Every request goes through one `httpx` client with:
   on 408/425/429/5xx or transport errors, exponential backoff (cap 10s),
   honoring `Retry-After`; POSTs are never auto-retried (no duplicate
   accounts),
-- optional `proxy=` and a default `User-Agent: tempmail-sdk/<version>`,
+- optional `proxy=` and a default `User-Agent: multitempmail-sdk/<version>`,
 - consistent error mapping (see below).
 
 ```python
@@ -347,7 +347,7 @@ underlying `response`:
 | `FailoverError`       | provider pool exhausted / permanent failure; carries `.failures` (name, exception) pairs |
 
 ```python
-from tempmail.errors import TempMailError, TimeoutError
+from multitempmail.errors import TempMailError, TimeoutError
 
 try:
     otp = mailbox.wait_for_otp(timeout=60)
@@ -362,7 +362,7 @@ except TempMailError as exc:
 Write a `BaseProvider` subclass, register it, done:
 
 ```python
-from tempmail import BaseProvider, register
+from multitempmail import BaseProvider, register
 
 @register("myprovider")
 class MyProvider(BaseProvider):
@@ -397,7 +397,7 @@ pip install -e .[dev]
 python -m pytest      # 185 tests, all HTTP mocked via httpx.MockTransport
 ruff check .          # lint
 black --check .       # formatting
-mypy tempmail         # types
+mypy multitempmail         # types
 ```
 
 ## Contributing
@@ -413,10 +413,10 @@ Something not working? Check [`SUPPORT.md`](SUPPORT.md) — it covers bug
 reports, provider API changes, unsupported providers, installation and
 CLI issues. In short:
 
-- **Bugs and feature requests** → open a [GitHub issue](https://github.com/0xdzik/tempmail-api/issues).
+- **Bugs and feature requests** → open a [GitHub issue](https://github.com/0xdzik/multitempmail/issues).
 - **A provider's API changed or broke** → report it so the provider
   plug-in can be updated; endpoint shapes come from provider docs only.
-- **Include** Python version, package version (`pip show tempmail-api`) and
+- **Include** Python version, package version (`pip show multitempmail`) and
   the minimal code that reproduces the problem.
 
 ## License

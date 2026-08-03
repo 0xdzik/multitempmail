@@ -30,7 +30,7 @@ class ProviderInfo:
         name: canonical provider name (e.g. ``"mailtm"``).
         display_name: human friendly name (e.g. ``"Mail.tm"``).
         priority: configured selection priority; higher wins.
-        capabilities: supported :class:`~tempmail.caps.Cap` values.
+        capabilities: supported :class:`~multitempmail.caps.Cap` values.
         aliases: accepted names (including ``name`` itself).
         known_domains: statically-known usable domains (empty when the
             provider publishes its domain list at runtime instead).
@@ -52,9 +52,9 @@ class BaseProvider:
     """Contract every provider implements.
 
     Subclasses declare ``name``, ``display_name``, ``base_url`` and the
-    subset of :class:`~tempmail.caps.Cap` they support. All HTTP goes
-    through a single :class:`~tempmail.http.HTTPClient`; failures are
-    mapped to :mod:`tempmail.errors` subclasses.
+    subset of :class:`~multitempmail.caps.Cap` they support. All HTTP goes
+    through a single :class:`~multitempmail.http.HTTPClient`; failures are
+    mapped to :mod:`multitempmail.errors` subclasses.
     """
 
     name: ClassVar[str] = "base"

@@ -32,7 +32,7 @@ class MailTmProvider(BaseProvider):
     Mailboxes are real accounts: ``create()`` picks an active public
     domain, creates the account with a generated password and authenticates
     to obtain a Bearer token, which is stored on the returned
-    :class:`~tempmail.models.Mailbox`. ``attach()`` accepts either a
+    :class:`~multitempmail.models.Mailbox`. ``attach()`` accepts either a
     ``token`` or a ``password`` (re-authenticated via ``POST /token``).
     """
 

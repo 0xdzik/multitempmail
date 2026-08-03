@@ -6,8 +6,8 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from tempmail.errors import TempMailError
-from tempmail.models import Address, Attachment, Mailbox, Message
+from multitempmail.errors import TempMailError
+from multitempmail.models import Address, Attachment, Mailbox, Message
 
 
 def make_mailbox(**kw):
