@@ -7,11 +7,6 @@ on:
 
 permissions:
   contents: read
-  # Trusted publishing: PyPI needs an id-token write to mint a short-lived
-  # upload token. Alternative: set a PYPI_API_TOKEN repository secret
-  # (https://pypi.org/manage/account/token/) and the workflow falls back
-  # to it automatically.
-  id-token: write
 
 jobs:
   build:
@@ -54,7 +49,13 @@ jobs:
     name: Publish to PyPI
     needs: build
     runs-on: ubuntu-latest
-    environment: pypi
+    # Trusted publishing: the "release" environment allows an id-token to
+    # be minted for PyPI. Alternatively, set a PYPI_API_TOKEN repository
+    # secret and the fallback path below is used instead.
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -62,18 +63,27 @@ jobs:
           name: dist
           path: dist/
 
-      - name: Publish (trusted publishing)
-        if: ${{ !secrets.PYPI_API_TOKEN }}
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: dist/
+      # Detect a fallback API token without referencing secrets in an
+      # `if` condition (GitHub does not allow secrets there).
+      - name: Detect PyPI API token
+        id: token
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          echo "has_token=$([ -n "$PYPI_API_TOKEN" ] && echo yes || echo no)" >> "$GITHUB_OUTPUT"
 
-      - name: Publish (API token fallback)
-        if: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Publish to PyPI (API token)
+        if: steps.token.outputs.has_token == 'yes'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish to PyPI (trusted publishing)
+        if: steps.token.outputs.has_token != 'yes'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
 
       # Configure one of the two methods:
       # 1. Trusted publishing (recommended): enable "Trusted Publishing" for
