@@ -1,0 +1,83 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  # Trusted publishing: PyPI needs an id-token write to mint a short-lived
+  # upload token. Alternative: set a PYPI_API_TOKEN repository secret
+  # (https://pypi.org/manage/account/token/) and the workflow falls back
+  # to it automatically.
+  id-token: write
+
+jobs:
+  build:
+    name: Build and verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install build tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build package
+        run: python -m build
+
+      - name: Verify build (twine check)
+        run: twine check dist/*
+
+      - name: Smoke-test sdist and wheel
+        run: |
+          python -m pip install --force-reinstall dist/*.whl
+          python -c "from tempmail import TempMailClient; print('import ok')"
+          tempmail --help >/dev/null && tempmail-api --help >/dev/null
+          echo "console scripts ok"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish (trusted publishing)
+        if: ${{ !secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+
+      - name: Publish (API token fallback)
+        if: ${{ secrets.PYPI_API_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      # Configure one of the two methods:
+      # 1. Trusted publishing (recommended): enable "Trusted Publishing" for
+      #    the tempmail-api project at https://pypi.org/manage/project/
+      #    (publisher: the repository owner, workflow name "Release").
+      # 2. API token: create a token at https://pypi.org/manage/account/token/
+      #    and store it as the PYPI_API_TOKEN repository secret.

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling / caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.coverage.*
+
+# OS / editor
+.DS_Store
+*.swp
+
+# Local sessions
+session.json
+
+# Agent working dirs / scaffolding
+.opencode/
+.playwright-mcp/
+list.txt
