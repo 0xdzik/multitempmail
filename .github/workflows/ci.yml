@@ -37,4 +37,12 @@ jobs:
         run: mypy multitempmail
 
       - name: pytest (tests + coverage)
-        run: pytest --cov=multitempmail --cov-report=term-missing --cov-fail-under=85
+        run: pytest --cov=multitempmail --cov-report=term-missing --cov-report=xml --cov-fail-under=85
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
