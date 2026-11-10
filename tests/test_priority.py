@@ -5,7 +5,9 @@ the order exists. Ordering is a product decision, not an accident:
 
 1. catchmail (100) — no setup, `create()` makes no network call, ~5 ms to a
    usable address, and it supports read + attachments + delete message.
-2. mailtm (90)    — real API with the widest capabilities, but rate-limited to
+2. dummyinbox (95) — four selectable domains, 60 req/min, real server-side
+   long-poll. Every `create()` is a round-trip and mail expires after 48 h.
+3. mailtm (90)    — real API with the widest capabilities, but rate-limited to
    10 requests/minute and ~1-3 s per call.
 4. tempmail_lol (85) — real server-side inbox, but reads consume messages, so
    it cannot be probed speculatively.
@@ -26,6 +28,7 @@ def _caps(provider) -> set[str]:
 def test_priority_order() -> None:
     assert [p.name for p in TempMailClient().providers()] == [
         "catchmail",
+        "dummyinbox",
         "mailtm",
         "tempmail_lol",
     ]

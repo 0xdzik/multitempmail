@@ -222,6 +222,9 @@ _ALIASES = {
     "tempmail_lol": "tempmail_lol",
     "tempmail.lol": "tempmail_lol",
     "tempmail": "tempmail_lol",
+    "dummyinbox": "dummyinbox",
+    "dummyinbox.com": "dummyinbox",
+    "dummy": "dummyinbox",
 }
 
 

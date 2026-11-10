@@ -12,7 +12,7 @@ from tests.conftest import Router, json_response, make_http
 
 
 def test_list_providers():
-    assert list_providers() == ["catchmail", "mailtm", "tempmail_lol"]
+    assert list_providers() == ["catchmail", "dummyinbox", "mailtm", "tempmail_lol"]
 
 
 @pytest.mark.parametrize(

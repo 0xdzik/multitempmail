@@ -174,6 +174,7 @@ def test_client_pool_default_orders_by_priority() -> None:
     assert client.name == "catchmail"
     assert [p.name for p in client.providers()] == [
         "catchmail",
+        "dummyinbox",
         "mailtm",
         "tempmail_lol",
     ]

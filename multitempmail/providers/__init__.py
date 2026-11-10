@@ -9,6 +9,6 @@ faulted and consumed a retry slot before every real attempt.
 
 from __future__ import annotations
 
-from . import catchmail, mailtm, tempmail_lol
+from . import catchmail, dummyinbox, mailtm, tempmail_lol
 
-__all__ = ["catchmail", "mailtm", "tempmail_lol"]
+__all__ = ["catchmail", "dummyinbox", "mailtm", "tempmail_lol"]

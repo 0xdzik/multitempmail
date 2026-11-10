@@ -25,7 +25,7 @@ def _mock_client(monkeypatch, provider_name: str, router: Router) -> TempMailCli
 def test_providers_lists_all(capsys) -> None:
     assert cli.main(["providers"]) == 0
     out = capsys.readouterr().out
-    for name in ("mailtm", "catchmail", "tempmail_lol"):
+    for name in ("mailtm", "catchmail", "dummyinbox", "tempmail_lol"):
         assert name in out
 
 
@@ -35,6 +35,7 @@ def test_providers_json(capsys) -> None:
     assert {p["name"] for p in payload} == {
         "mailtm",
         "catchmail",
+        "dummyinbox",
         "tempmail_lol",
     }
     mailtm = next(p for p in payload if p["name"] == "mailtm")
