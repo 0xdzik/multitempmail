@@ -43,9 +43,7 @@ def _ensure_mailbox(client: TempMailClient, session: str, provider: str | None =
 
 def _list_domains(provider: Any) -> list[str]:
     """Normalized domain list for display (provider-specific shapes)."""
-    if provider.name == "mailcx":
-        items = provider.config().get("system_domains", [])
-    elif hasattr(provider, "domains"):
+    if hasattr(provider, "domains"):
         items = provider.domains()
     else:
         items = []

@@ -13,7 +13,6 @@ from multitempmail.client import TempMailClient
 def _mock_client(monkeypatch, provider_name: str, router: Router) -> TempMailClient:
     bases = {
         "mailtm": "https://api.mail.tm",
-        "mailcx": "https://api.mail.cx/v1",
         "catchmail": "https://api.catchmail.io",
     }
     http = make_http(bases[provider_name], router)
@@ -26,7 +25,7 @@ def _mock_client(monkeypatch, provider_name: str, router: Router) -> TempMailCli
 def test_providers_lists_all(capsys) -> None:
     assert cli.main(["providers"]) == 0
     out = capsys.readouterr().out
-    for name in ("mailtm", "mailcx", "catchmail", "tempmail_lol", "mailtd"):
+    for name in ("mailtm", "catchmail", "tempmail_lol"):
         assert name in out
 
 
@@ -35,10 +34,8 @@ def test_providers_json(capsys) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert {p["name"] for p in payload} == {
         "mailtm",
-        "mailcx",
         "catchmail",
         "tempmail_lol",
-        "mailtd",
     }
     mailtm = next(p for p in payload if p["name"] == "mailtm")
     assert mailtm["priority"] == 100

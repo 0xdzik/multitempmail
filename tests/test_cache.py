@@ -167,20 +167,19 @@ def test_domains_cached_via_provider_cache() -> None:
     router = Router()
     calls = {"n": 0}
 
-    @router.on("GET", "/api/domains")
+    @router.on("GET", "/domains")
     def domains(request):
         calls["n"] += 1
-        return json_response(200, {"domains": [{"id": "u1", "domain": "x.td", "default": True}]})
+        return json_response(200, {"hydra:member": [{"id": "u1", "domain": "x.tm", "isActive": True}]})
 
     provider = get_provider(
-        "mailtd",
-        http=make_http("https://api.mail.td", router),
+        "mailtm",
+        http=make_http("https://api.mail.tm", router),
         cache=ResponseCache(),
-        api_key="td_x",
     )
-    assert provider.domains() == [{"id": "u1", "domain": "x.td", "default": True}]
-    assert provider.domains() == [{"id": "u1", "domain": "x.td", "default": True}]
+    assert provider.domains() == [{"id": "u1", "domain": "x.tm", "isActive": True}]
+    assert provider.domains() == [{"id": "u1", "domain": "x.tm", "isActive": True}]
     assert calls["n"] == 1
     provider.clear_cache()
-    assert provider.domains() == [{"id": "u1", "domain": "x.td", "default": True}]
+    assert provider.domains() == [{"id": "u1", "domain": "x.tm", "isActive": True}]
     assert calls["n"] == 2

@@ -40,8 +40,8 @@ def test_success_recovers_priority() -> None:
 
 
 def test_snapshot_zeros_for_unknown_provider() -> None:
-    snapshot = HealthManager().snapshot("mailcx", 95)
-    assert snapshot.name == "mailcx"
+    snapshot = HealthManager().snapshot("catchmail", 95)
+    assert snapshot.name == "catchmail"
     assert snapshot.healthy
     assert snapshot.consecutive_failures == 0
     assert snapshot.total_requests == 0
@@ -54,9 +54,9 @@ def test_snapshot_zeros_for_unknown_provider() -> None:
 
 def test_snapshot_reflects_state_and_error() -> None:
     health = HealthManager()
-    health.record_failure("mailtd", "rate limit")
-    health.record_failure("mailtd", "rate limit again")
-    snapshot = health.snapshot("mailtd", 60)
+    health.record_failure("mailtm", "rate limit")
+    health.record_failure("mailtm", "rate limit again")
+    snapshot = health.snapshot("mailtm", 60)
     assert not snapshot.healthy
     assert snapshot.consecutive_failures == 2
     assert snapshot.total_requests == 2
@@ -78,8 +78,8 @@ def test_avg_response_time() -> None:
 def test_reset_and_clear() -> None:
     health = HealthManager()
     health.record_failure("mailtm")
-    health.record_failure("mailcx")
-    assert health.providers == ["mailcx", "mailtm"]
+    health.record_failure("catchmail")
+    assert health.providers == ["catchmail", "mailtm"]
     health.reset("mailtm")
     assert "mailtm" not in health
     health.clear()
@@ -89,9 +89,9 @@ def test_reset_and_clear() -> None:
 def test_snapshots_with_priorities() -> None:
     health = HealthManager()
     health.record_success("mailtm")
-    views = health.snapshots({"mailtm": 100, "mailcx": 95})
+    views = health.snapshots({"mailtm": 100, "catchmail": 95})
     names = [v.name for v in views]
-    assert names == ["mailcx", "mailtm"]
+    assert names == ["catchmail", "mailtm"]
     by_name = {v.name: v for v in views}
-    assert by_name["mailcx"].priority == 95
+    assert by_name["catchmail"].priority == 95
     assert by_name["mailtm"].priority == 100

@@ -25,8 +25,7 @@ class TempMailClient:
             registered provider. With several providers, :meth:`create`
             automatically fails over in priority order (see below).
         **options: passed to every provider constructor (e.g.
-            ``api_key=`` for mail.td, ``api_token=`` for mail.cx,
-            ``proxy=`` / ``timeout=`` / ``retries=`` for the HTTP layer,
+            ``proxy=`` / ``timeout=`` / ``retries`` for the HTTP layer,
             ``priority=`` / ``cache=`` / ``health=`` for selection).
 
     Provider selection & failover::

@@ -65,7 +65,7 @@ class BaseProvider:
     #: Subclasses may override; an instance-level ``priority=`` option wins.
     default_priority: ClassVar[int] = 100
     #: domains usable without a runtime lookup (""/None when the provider
-    #: publishes its list at runtime, e.g. mail.tm / mail.td / mail.cx).
+    #: publishes its list at runtime, e.g. mail.tm).
     known_domains: ClassVar[tuple[str, ...]] = ()
     #: whether message lists may be cached (False for APIs that consume
     #: emails on read, e.g. tempmail.lol).
@@ -222,10 +222,6 @@ _ALIASES = {
     "tempmail_lol": "tempmail_lol",
     "tempmail.lol": "tempmail_lol",
     "tempmail": "tempmail_lol",
-    "mailcx": "mailcx",
-    "mail.cx": "mailcx",
-    "mailtd": "mailtd",
-    "mail.td": "mailtd",
 }
 
 
@@ -242,10 +238,9 @@ def register(name: str):
 def get_provider(name: str, **options: Any) -> BaseProvider:
     """Instantiate the provider registered under ``name``.
 
-    Names are case-insensitive; common aliases (``mail.tm``, ``mail.cx``,
-    ``mail.td``, ``tempmail.lol``) are accepted. Extra keyword arguments
-    are passed to the provider constructor (e.g. ``api_key=`` for mail.td,
-    ``api_token=`` for mail.cx).
+    Names are case-insensitive; common aliases (``mail.tm``,
+    ``tempmail.lol``) are accepted. Extra keyword arguments are passed to the
+    provider constructor.
     """
     key = _ALIASES.get(str(name).lower().strip(), str(name).lower().strip())
     if key not in _REGISTRY:

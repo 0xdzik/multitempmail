@@ -32,7 +32,7 @@ class Attachment:
 
     Providers expose either ``download_url`` (relative or absolute, e.g.
     mail.tm / catchmail.io) or a zero-based ``index`` used to download
-    (mail.cx / mail.td). Fetch the content with
+    (tempmail.lol). Fetch the content with
     ``mailbox.download(message, attachment)``.
     """
 
@@ -49,8 +49,8 @@ class Message:
     """A normalized email message.
 
     ``body_text``/``body_html`` may be ``None`` when only a summary was
-    fetched (mail.tm / catchmail.io / mail.cx / mail.td list messages
-    without bodies). Call ``mailbox.message(id)`` for the full message, or
+    fetched (mail.tm / catchmail.io list messages without bodies). Call
+    ``mailbox.message(id)`` for the full message, or
     use the ``wait_for_*`` helpers which fetch bodies automatically.
     """
 
@@ -81,8 +81,8 @@ class Mailbox:
         provider: provider name (e.g. ``"mailtm"``).
         address: full mailbox address.
         token: provider-specific credential (Bearer token for mail.tm,
-            inbox token for tempmail.lol, account id for mail.td).
-        password: account password (mail.tm / mail.td), needed to
+            inbox token for tempmail.lol).
+        password: account password (mail.tm), needed to
             re-authenticate mail.tm mailboxes.
         expires_at: when the provider deletes the mailbox (if documented).
         created_at: when the mailbox was created (if documented).
@@ -171,7 +171,7 @@ class Mailbox:
         self._invalidate_caches()
 
     def delete_mailbox(self) -> None:
-        """Delete the mailbox (or clear every email, for mail.cx)."""
+        """Delete the mailbox."""
         self._bind().delete_mailbox(self)
         self._invalidate_caches()
 

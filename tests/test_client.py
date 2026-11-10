@@ -12,7 +12,7 @@ from tests.conftest import Router, json_response, make_http
 
 
 def test_list_providers():
-    assert list_providers() == ["catchmail", "mailcx", "mailtd", "mailtm", "tempmail_lol"]
+    assert list_providers() == ["catchmail", "mailtm", "tempmail_lol"]
 
 
 @pytest.mark.parametrize(
@@ -26,12 +26,17 @@ def test_list_providers():
         ("tempmail_lol", "tempmail_lol"),
         ("tempmail.lol", "tempmail_lol"),
         ("tempmail", "tempmail_lol"),
-        ("mail.cx", "mailcx"),
-        ("mail.td", "mailtd"),
     ],
 )
 def test_provider_aliases(name, expected):
     assert get_provider(name).name == expected
+
+
+@pytest.mark.parametrize("removed", ["mailcx", "mail.cx", "mailtd", "mail.td"])
+def test_keyed_providers_are_gone(removed):
+    """Providers that required a paid API key/token are no longer shipped."""
+    with pytest.raises(ValueError, match="unknown provider"):
+        get_provider(removed)
 
 
 def test_unknown_provider():

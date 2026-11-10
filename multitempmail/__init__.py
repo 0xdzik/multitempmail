@@ -1,6 +1,6 @@
 """multitempmail — a unified SDK for temporary email providers.
 
-Supported providers: mail.tm, catchmail.io, tempmail.lol, mail.cx, mail.td.
+Supported providers: mail.tm, catchmail.io, tempmail.lol.
 
 Quickstart::
 

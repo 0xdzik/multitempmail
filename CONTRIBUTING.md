@@ -38,7 +38,7 @@ not touch, say so in the PR description rather than weakening the config.
 ## How to add a new provider
 
 1. Create `multitempmail/providers/<name>.py` with a class inheriting from
-   `BaseProvider` (see `mailcx.py` for a compact example).
+   `BaseProvider` (see `catchmail.py` for a compact example).
 2. Declare metadata: `name`, `display_name`, `base_url`, `capabilities`
    (a `frozenset` of `Cap` values), `default_priority`, `known_domains`.
 3. Implement **documented endpoints only** — read the provider's API docs.
