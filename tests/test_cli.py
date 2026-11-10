@@ -38,7 +38,9 @@ def test_providers_json(capsys) -> None:
         "tempmail_lol",
     }
     mailtm = next(p for p in payload if p["name"] == "mailtm")
-    assert mailtm["priority"] == 100
+    assert mailtm["priority"] == 90
+    catchmail = next(p for p in payload if p["name"] == "catchmail")
+    assert catchmail["priority"] == 100
     assert "catchmail.io" in next(p for p in payload if p["name"] == "catchmail")["known_domains"]
 
 

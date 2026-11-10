@@ -44,8 +44,9 @@ def test_unknown_provider():
         get_provider("nope")
 
 
-def test_default_provider_is_mailtm():
-    assert TempMailClient().name == "mailtm"
+def test_default_provider_is_catchmail():
+    """catchmail leads: no setup, richest key-free caps, 5 ms create."""
+    assert TempMailClient().name == "catchmail"
 
 
 def test_client_accepts_provider_instance():

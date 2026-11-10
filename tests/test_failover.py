@@ -147,10 +147,10 @@ def test_demoted_provider_tried_last() -> None:
         _provider("catchmail", Router()),
         health=health,
     )
-    assert [p.name for p in pool.ordered()] == ["mailtm", "catchmail", "tempmail_lol"]
-    health.record_failure("mailtm")
-    health.record_failure("mailtm")
-    assert [p.name for p in pool.ordered()] == ["catchmail", "tempmail_lol", "mailtm"]
+    assert [p.name for p in pool.ordered()] == ["catchmail", "mailtm", "tempmail_lol"]
+    health.record_failure("catchmail")
+    health.record_failure("catchmail")
+    assert [p.name for p in pool.ordered()] == ["mailtm", "tempmail_lol", "catchmail"]
 
 
 def test_success_recovers_ordering() -> None:
@@ -171,10 +171,10 @@ def test_client_pool_default_orders_by_priority() -> None:
     from multitempmail.client import TempMailClient
 
     client = TempMailClient()
-    assert client.name == "mailtm"
+    assert client.name == "catchmail"
     assert [p.name for p in client.providers()] == [
-        "mailtm",
         "catchmail",
+        "mailtm",
         "tempmail_lol",
     ]
 

@@ -39,7 +39,10 @@ class MailTmProvider(BaseProvider):
     name = "mailtm"
     display_name = "Mail.tm"
     base_url = "https://api.mail.tm"
-    default_priority = 100
+    # Real API (account + token + password) with the richest capabilities, but
+    # rate-limited to 10 requests/minute and ~1-3 s per call, so it is not the
+    # first choice. It is the reliable path when another provider lets you down.
+    default_priority = 90
     capabilities = frozenset(
         {
             Cap.CREATE,

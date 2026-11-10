@@ -42,7 +42,9 @@ class CatchmailProvider(BaseProvider):
     name = "catchmail"
     display_name = "catchmail.io"
     base_url = "https://api.catchmail.io"
-    default_priority = 90
+    # Highest: no setup, richest key-free capability set, and create() costs
+    # no network round-trip. Measured ~5 ms to first usable address.
+    default_priority = 100
     known_domains = ("catchmail.io",)
     capabilities = frozenset({Cap.CREATE, Cap.LIST, Cap.READ, Cap.DELETE_MESSAGE, Cap.ATTACHMENTS})
 

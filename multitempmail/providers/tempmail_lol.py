@@ -46,6 +46,8 @@ class TempmailLolProvider(BaseProvider):
     name = "tempmail_lol"
     display_name = "tempmail.lol"
     base_url = "https://api.tempmail.lol"
+    # Real server-side inboxes, but every fetch consumes the messages, so it
+    # cannot be probed speculatively. Keep it last.
     default_priority = 85
     cache_messages = False
     capabilities = frozenset(
