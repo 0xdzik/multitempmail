@@ -21,9 +21,72 @@ def test_create_makes_no_request(provider):
     assert mailbox.address.split("@")[0]
 
 
-def test_create_custom_domain_and_local_part(provider):
-    mailbox = provider.create(domain="my.example", local_part="foo")
-    assert mailbox.address == "foo@my.example"
+def test_create_custom_local_part_on_known_domain(provider):
+    mailbox = provider.create(local_part="foo")
+    assert mailbox.address == "foo@catchmail.io"
+
+
+def test_create_rejects_unknown_domain(provider):
+    """A domain the server does not provision must fail here, not at messages()."""
+    with pytest.raises(ValueError, match="allowed domains are catchmail.io"):
+        provider.create(domain="my.example")
+
+
+def test_create_domain_is_case_insensitive(provider):
+    mailbox = provider.create(domain="CATCHMAIL.IO", local_part="foo")
+    assert mailbox.address == "foo@catchmail.io"
+
+
+@pytest.mark.parametrize(
+    "bad_domain",
+    ["", "@@@", "no-dot", "has space.com", "a..b.com", "-lead.com", "trail-.com"],
+)
+def test_create_rejects_malformed_domain(provider, bad_domain):
+    with pytest.raises(ValueError, match="invalid domain|unsupported domain"):
+        provider.create(domain=bad_domain)
+
+
+@pytest.mark.parametrize("bad_local", ["a@b", "has space", ".lead", "trail.", "a..b", "x" * 65])
+def test_create_rejects_malformed_local_part(provider, bad_local):
+    with pytest.raises(ValueError, match="invalid local part"):
+        provider.create(local_part=bad_local)
+
+
+def test_create_empty_local_part_generates_random(provider):
+    mailbox = provider.create(local_part="")
+    assert mailbox.address.endswith("@catchmail.io")
+    assert len(mailbox.address.split("@")[0]) > 0
+
+
+def test_expect_delivery_probes_once_per_domain(provider, router: Router):
+    calls = {"n": 0}
+
+    @router.on("GET", "/api/v1/mailbox")
+    def mailbox(request):
+        calls["n"] += 1
+        return json_response(200, {"messages": []})
+
+    provider.create(expect_delivery=True)
+    provider.create(expect_delivery=True)
+    provider.create(expect_delivery=True)
+    assert calls["n"] == 1, "domain probe must happen once, not per create()"
+
+
+def test_expect_delivery_surfaces_a_rejected_domain(provider, router: Router):
+    @router.on("GET", "/api/v1/mailbox")
+    def mailbox(request):
+        return json_response(400, {"error": "validation_error"})
+
+    with pytest.raises(Exception, match="rejected domain"):
+        provider.create(expect_delivery=True)
+
+
+def test_create_without_expect_delivery_makes_no_request(provider, router: Router):
+    @router.on("GET", "/api/v1/mailbox")
+    def mailbox(request):  # pragma: no cover - must never run
+        raise AssertionError("plain create() must not perform a request")
+
+    provider.create(local_part="offline1")
 
 
 def test_messages(router: Router, provider):

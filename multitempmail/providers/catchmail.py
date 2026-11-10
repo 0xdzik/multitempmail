@@ -26,7 +26,7 @@ from ..base import BaseProvider, register
 from ..caps import Cap
 from ..errors import ProviderError
 from ..models import Address, Attachment, Mailbox, Message
-from ..utils import parse_dt, random_local_part
+from ..utils import parse_dt, random_local_part, validate_domain, validate_local_part
 
 
 @register("catchmail")
@@ -48,15 +48,63 @@ class CatchmailProvider(BaseProvider):
     known_domains = ("catchmail.io",)
     capabilities = frozenset({Cap.CREATE, Cap.LIST, Cap.READ, Cap.DELETE_MESSAGE, Cap.ATTACHMENTS})
 
-    def create(self, *, domain: str = "catchmail.io", local_part: str | None = None) -> Mailbox:  # type: ignore[override]
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        #: domains already confirmed by ``expect_delivery`` — one probe each
+        self._verified_domains: set[str] = set()
+
+    def create(  # type: ignore[override]
+        self,
+        *,
+        domain: str = "catchmail.io",
+        local_part: str | None = None,
+        expect_delivery: bool = False,
+    ) -> Mailbox:
         """Return a mailbox for a locally generated address.
 
         No request is made — the address just needs to exist once mail is
-        sent to it.
+        sent to it. Because there is no round-trip, this method validates its
+        own inputs: an unchecked ``domain`` would hand back an address the
+        server later rejects with an opaque ``validation_error``.
+
+        Args:
+            domain: must be a syntactically valid DNS name and one of
+                :attr:`known_domains`; anything else raises ``ValueError``
+                naming the accepted values.
+            local_part: 1-64 chars of letters, digits, ``.``, ``_``, ``%``,
+                ``+``, ``-``. An embedded ``@``, a space, a leading/trailing
+                separator or an over-long value raises ``ValueError``.
+                Empty/``None`` generates a random one.
+            expect_delivery: when ``True``, once per provider instance, make a
+                single ``GET /api/v1/mailbox`` call so a domain the server does
+                not accept fails here instead of at the first ``messages()``.
+
+        Raises:
+            ValueError: invalid or unsupported ``domain`` / ``local_part``.
+            ProviderError: ``expect_delivery`` was set and the server rejected
+                the domain.
         """
-        local = local_part or random_local_part()
+        domain = validate_domain(domain, self.known_domains)
+        local = validate_local_part(local_part) if local_part else random_local_part()
         address = f"{local}@{domain}"
-        return Mailbox(provider=self.name, address=address, _provider=self)
+        mailbox = Mailbox(provider=self.name, address=address, _provider=self)
+        if expect_delivery:
+            self._verify_domain_accepts(domain, mailbox)
+        return mailbox
+
+    def _verify_domain_accepts(self, domain: str, mailbox: Mailbox) -> None:
+        """Probe the mailbox endpoint once per domain so a bad domain fails early."""
+        if domain in self._verified_domains:
+            return
+        try:
+            self.messages(mailbox)
+        except ProviderError as exc:
+            raise ProviderError(
+                f"catchmail.io rejected domain {domain!r}. Only "
+                f"{', '.join(self.known_domains)} is provisioned for public use; "
+                f"add your own domain on catchmail.io first. Server said: {exc}"
+            ) from exc
+        self._verified_domains.add(domain)
 
     def attach(self, address: str, **extra: Any) -> Mailbox:  # type: ignore[override]
         """Attach to any address (no credentials needed)."""

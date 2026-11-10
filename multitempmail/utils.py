@@ -15,10 +15,14 @@ __all__ = [
     "extract_links",
     "extract_otp",
     "extract_otps",
+    "is_valid_domain",
+    "is_valid_local_part",
     "parse_dt",
     "random_local_part",
     "random_password",
     "substring_match",
+    "validate_domain",
+    "validate_local_part",
 ]
 
 #: six consecutive digits, e.g. ``123456``
@@ -141,6 +145,83 @@ def random_local_part(
         if rx is None or rx.fullmatch(part):
             return part
     return prefix + "".join(secrets.choice(_ALNUM) for _ in range(n))
+
+
+#: a DNS-style domain: at least one dot, RFC-1123 labels, 253 chars max
+_DOMAIN_RE = re.compile(
+    r"^(?=.{1,253}$)"
+    r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+"
+    r"[a-z]{2,63}$"
+)
+
+#: the local part of an address: 1-64 chars of alnum plus . _ - %
+_LOCAL_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._%+-]{0,62}[A-Za-z0-9])?$")
+
+LOCAL_PART_MAX = 64
+DOMAIN_MAX = 253
+
+
+def is_valid_domain(domain: object) -> bool:
+    """True when ``domain`` is a syntactically valid DNS domain name."""
+    if not isinstance(domain, str):
+        return False
+    value = domain.strip().lower()
+    if not value or len(value) > DOMAIN_MAX:
+        return False
+    if not _DOMAIN_RE.fullmatch(value):
+        return False
+    # A label may not start or end with a hyphen (covered by the regex) and
+    # the whole name may not contain an empty label (the regex rejects "..").
+    return True
+
+
+def is_valid_local_part(local: object) -> bool:
+    """True when ``local`` is a usable email local part.
+
+    Rejects an embedded ``@`` (which would yield a two-``@`` address), spaces,
+    control characters, leading/trailing dots or separators, and anything over
+    :data:`LOCAL_PART_MAX` characters.
+    """
+    if not isinstance(local, str):
+        return False
+    if not (1 <= len(local) <= LOCAL_PART_MAX):
+        return False
+    if not _LOCAL_RE.fullmatch(local):
+        return False
+    if ".." in local:
+        return False
+    return True
+
+
+def validate_domain(domain: object, allowed: tuple[str, ...] | list[str] | None = None) -> str:
+    """Return ``domain`` normalised, or raise ``ValueError`` explaining why not.
+
+    When ``allowed`` is given, the domain must appear in it (case-insensitive);
+    the error names every accepted value so the caller can recover.
+    """
+    if not is_valid_domain(domain):
+        raise ValueError(
+            f"invalid domain {domain!r}: expected a DNS name such as 'example.com'"
+        )
+    value = str(domain).strip().lower()
+    if allowed:
+        permitted = tuple(a.strip().lower() for a in allowed)
+        if value not in permitted:
+            raise ValueError(
+                f"unsupported domain {domain!r}: allowed domains are {', '.join(permitted)}"
+            )
+    return value
+
+
+def validate_local_part(local: object) -> str:
+    """Return ``local`` unchanged, or raise ``ValueError`` explaining why not."""
+    if not is_valid_local_part(local):
+        raise ValueError(
+            f"invalid local part {local!r}: use 1-{LOCAL_PART_MAX} characters of "
+            "letters, digits, '.', '_', '%', '+', '-' with no '@', spaces, or "
+            "leading/trailing separators"
+        )
+    return str(local)
 
 
 def random_password(length: int = 16) -> str:
