@@ -16,18 +16,18 @@
 
 Wrappers for a single temporary email provider break the moment that
 provider is down, rate-limited, or disappears. `multitempmail` treats
-temporary email as one problem, not five:
+temporary email as one problem, not three:
 
 - **one API** — the same `TempMailClient`, models, exceptions and helpers
   for every provider; swap providers without changing your code
-- **multiple providers** — mail.tm, catchmail.io, tempmail.lol, mail.cx
-  and mail.td behind a dynamic registry
+- **multiple providers** — catchmail.io, dummyinbox.com, mail.tm and
+  tempmail.lol behind a dynamic registry, all usable with no API key
 - **automatic failover** — the default client pools every provider and
   falls through on transient failures in priority order
 - **provider health management** — failing providers are demoted
   automatically and recover after a successful request
 - **production-ready architecture** — shared HTTP layer (timeouts,
-  retries, proxy), typed models, one error hierarchy, 185-test suite with
+  retries, proxy), typed models, one error hierarchy, 209-test suite with
   fully mocked HTTP
 
 ## Features
@@ -42,7 +42,7 @@ temporary email as one problem, not five:
 - [x] Response cache (TTL, auto-invalidation)
 - [x] CLI (`create`, `inbox`, `otp`, `providers`, ...)
 - [x] Type hints (mypy-strict)
-- [x] Comprehensive test suite (185 tests, mocked HTTP)
+- [x] Comprehensive test suite (209 tests, mocked HTTP)
 
 ## Installation
 
@@ -80,26 +80,44 @@ multitempmail otp --timeout 60 --session session.json
 |--------------|------------------------------------|:-----------:|:-----------:|:---------:|:------:|
 | Mail.tm      | none (account + token created for you) | ✓         |             | ✓         | Active |
 | CatchMail.io | none — mailbox is implicit         | ✓           |             |           | Active |
+| DummyInbox   | none — server picks the address    |             | ✓ (30 s hold) |           | Active |
 | TempMail.lol | optional Plus/Ultra API key        |             | ✓ (long-poll) |         | Active |
-| Mail.cx      | optional token for higher limits   | ✓           | ✓ (25s hold) |           | Active |
-| Mail.td      | API token required (Pro)           | ✓           |             | ✓         | Active |
 
-Provider names are case-insensitive; `mail.tm`, `mail.cx`, `mail.td`,
-`tempmail.lol` and `catchmail.io` aliases work everywhere.
+
+Provider names are case-insensitive; the `mail.tm`, `tempmail.lol`,
+`catchmail.io` and `dummyinbox.com` aliases work everywhere. `catchmail` is the
+default provider.
+
+> `dummyinbox` is the multi-domain option: `GET /domains` currently returns four
+> (`dummyinbox.com`, `987654320.xyz`, `dotmail.dev`, `223190.xyz`) and any of them
+> can be requested per call with `create(domain=...)`. The server always picks the
+> local part, so passing `local_part=` raises `ValueError` instead of being
+> silently ignored. Mail is deleted after 48 hours.
+
+> `catchmail.create()` builds the address **locally, with no HTTP request** — which
+> is why it leads: nothing can be down when nothing is called. Because there is no
+> round-trip, it validates its own inputs: `domain` must be a syntactically valid
+> DNS name **and** one of `known_domains` (currently `catchmail.io`), and
+> `local_part` must be 1-64 chars of letters, digits, `.`, `_`, `%`, `+`, `-`
+> with no embedded `@`, spaces, or leading/trailing separators. Anything else
+> raises `ValueError` immediately instead of returning an address the server
+> later rejects with an opaque `validation_error`.
+>
+> Pass `create(expect_delivery=True)` to make one `GET /api/v1/mailbox` probe per
+> domain (cached for the life of the provider instance) so a domain you added on
+> catchmail.io but that is not yet provisioned fails at `create()` with a clear
+> message.
 
 ### Capability matrix
 
 | Provider     | create | list | read | delete msg | delete mailbox | mark read | attachments | server wait | domain select |
 |--------------|:------:|:----:|:----:|:----------:|:--------------:|:---------:|:-----------:|:-----------:|:-------------:|
+| dummyinbox   |   ✓    |  ✓   |  ✓   |            |                |           |             |      ✓      |       ✓       |
 | mailtm       |   ✓    |  ✓   |  ✓   |     ✓      |       ✓        |     ✓     |      ✓      |             |       ✓       |
 | catchmail    |   ✓    |  ✓   |  ✓   |     ✓      |                |           |      ✓      |             |               |
 | tempmail_lol |   ✓    |  ✓   |      |     ✓      |       ✓        |           |             |      ✓      |               |
-| mailcx       |   ✓    |  ✓   |  ✓   |     ✓      |       ✓*       |           |      ✓      |      ✓      |               |
-| mailtd       |   ✓    |  ✓   |  ✓   |     ✓      |       ✓        |     ✓     |      ✓      |             |       ✓       |
 
-`*` mail.cx has no mailbox deletion; `delete_mailbox()` clears every email
-at the address (documented behavior). Unsupported operations raise
-`UnsupportedFeature` (a `TempMailError`).
+Unsupported operations raise `UnsupportedFeature` (a `TempMailError`).
 
 ## CLI
 
@@ -133,15 +151,15 @@ a thin wrapper over the SDK — no duplicated logic.
 
 ## Provider Selection
 
-This is the core selling point: **one call, five providers, automatic
+This is the core selling point: **one call, three providers, automatic
 failover.**
 
 ```mermaid
 flowchart LR
     Client[TempMailClient] --> Tm[Mail.tm]
-    Tm -- "timeout" --> Cx[Mail.cx]
-    Cx -- "rate limit" --> Ca[CatchMail.io]
-    Ca --> Ok[Success]
+    Tm -- "timeout" --> Ca[CatchMail.io]
+    Ca -- "rate limit" --> Tl[TempMail.lol]
+    Tl --> Ok[Success]
 ```
 
 ```python
@@ -151,13 +169,12 @@ mailbox = client.create()          # first provider that succeeds
 
 ### How it works
 
-| Provider     | priority | notes                             |
-|--------------|:--------:|-----------------------------------|
-| Mail.tm      |   100    | default, tried first              |
-| Mail.cx      |    95    |                                   |
-| CatchMail.io |    90    | no setup — good failover fallback |
-| TempMail.lol |    85    |                                   |
-| Mail.td      |    60    | needs an API key                  |
+| Provider     | priority | notes                                        |
+|--------------|:--------:|----------------------------------------------|
+| CatchMail.io |   100    | default — no setup, read+attachments, ~5 ms  |
+| DummyInbox   |    95    | 4 selectable domains, 60 req/min, 48 h mail  |
+| Mail.tm      |    90    | full API, but 10 req/min and ~1-3 s per call |
+| TempMail.lol |    85    | server-side inbox, but reads consume mail    |
 
 - Providers are tried highest **effective priority** first. `priority` is
   static; the health manager adjusts it live — each consecutive failure
@@ -165,8 +182,8 @@ mailbox = client.create()          # first provider that succeeds
 - **Recoverable failures** (rate limit, timeout, transport error, 5xx)
   advance to the next provider; **permanent errors** (invalid parameters,
   bad credentials, 404/410) raise `FailoverError` immediately.
-- Providers without credentials skip themselves automatically (e.g. a
-  mail.td pool with no `api_key` just moves on).
+- Every shipped provider works with **no credentials at all**; there is no
+  skipped-provider branch to reason about.
 - `client.providers()` lists static metadata; `client.health()` shows live
   health per provider (failure streaks, average response time, effective
   priority).
@@ -177,15 +194,15 @@ mailbox = client.create()          # first provider that succeeds
 
 ```python
 client = TempMailClient("mailtm")                # exactly one provider
-client = TempMailClient(["mailtm", "mail.cx"])   # a custom set
-client = TempMailClient("mail.td", api_key="td_...")
+client = TempMailClient(["mailtm", "catchmail"])  # a custom set
+client = TempMailClient("tempmail_lol")
 ```
 
 ### Waiting for mail
 
 All helpers wait **only for mail that arrives after the call** and raise
 `TimeoutError` (from `multitempmail.errors`) on expiry. Providers with a
-server-side long-poll (tempmail.lol `/wait`, mail.cx 25s hold) use it;
+server-side long-poll (tempmail.lol `/wait`) use it;
 others poll at `interval` seconds (default 2s).
 
 ```python
@@ -221,7 +238,7 @@ data = mailbox.download(full, 0)              # ... or by index
 ```
 
 Attachments carry either a `download_url` (mail.tm / catchmail.io) or a
-zero-based `index` (mail.cx / mail.td) — `mailbox.download()` handles both.
+zero-based `index` (tempmail.lol) — `mailbox.download()` handles both.
 
 ### Sessions
 
@@ -276,9 +293,9 @@ underlying `response`:
 
 | Exception             | Meaning                                            |
 |-----------------------|----------------------------------------------------|
-| `AuthenticationError` | 401/403, or missing credentials (e.g. no mail.td key) |
+| `AuthenticationError` | 401/403, or a mailbox token missing where one is required |
 | `MessageNotFound`     | 404 on a message-level operation                   |
-| `MailboxExpired`      | 410 (or 404 on mailbox deletion: mail.tm/mail.td)  |
+| `MailboxExpired`      | 410 (or 404 on mailbox deletion)  |
 | `RateLimitError`      | 429                                                |
 | `TimeoutError`        | request timeout or wait-helper expiry              |
 | `WaitCancelled`       | a wait helper's `stop=` callback returned `True` (a `TimeoutError`) |
@@ -304,11 +321,10 @@ flowchart TB
     App[Application] --> Client[TempMailClient]
     Client --> Pool[Provider Pool]
     Pool --> Registry[Provider Registry]
-    Registry --> Tm[Mail.tm]
-    Registry --> Cx[Mail.cx]
     Registry --> Ca[CatchMail.io]
+    Registry --> Di[DummyInbox]
+    Registry --> Tm[Mail.tm]
     Registry --> Tl[TempMail.lol]
-    Registry --> Td[Mail.td]
     Client --> Http[Shared HTTP layer<br/>timeouts · retries · error mapping]
 ```
 
@@ -318,19 +334,18 @@ sequenceDiagram
     participant App as Application
     participant C as TempMailClient
     participant Tm as Mail.tm
-    participant Cx as Mail.cx
     participant Ca as CatchMail.io
 
     App->>C: mailbox = client.create()
     C->>Tm: create mailbox
     Tm-->>C: timeout
     Note over C: recoverable → try next provider
-    C->>Cx: create mailbox
-    Cx-->>C: rate limited (429)
-    Note over C: recoverable → try next provider
     C->>Ca: create mailbox
-    Ca-->>C: mailbox created
-    C-->>App: Mailbox (catchmail address)
+    Ca-->>C: rate limited (429)
+    Note over C: recoverable → try next provider
+    C->>Tl: create inbox
+    Tl-->>C: mailbox created
+    C-->>App: Mailbox (tempmail.lol address)
 ```
 
 - **registry** — providers self-register via `@register(...)`; nothing is
@@ -384,11 +399,11 @@ MIT — see [`LICENSE`](LICENSE).
 
 ## Not implemented (future work)
 
-- Custom-domain registration/verification for mail.cx, mail.td and
+- Custom-domain registration/verification for
   tempmail.lol v3 (the endpoints exist server-side; domain *selection* on
   `create()` is supported where documented).
 - tempmail.lol v2 endpoints, scoped keys, webhooks.
-- mail.cx SSE streaming endpoints.
+- Streaming message endpoints.
 - Async API (the SDK is structured so a parallel `AsyncProvider` layer can
   reuse the models and error hierarchy).
 
@@ -397,5 +412,4 @@ MIT — see [`LICENSE`](LICENSE).
 - Mail.tm — https://docs.mail.tm
 - CatchMail.io — https://catchmail.io/docs
 - TempMail.lol — https://api.tempmail.lol (v3)
-- Mail.cx — https://mail.cx/api-docs/
-- Mail.td — https://docs.mail.td/llms.txt
+
