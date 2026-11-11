@@ -170,7 +170,9 @@ def test_domains_cached_via_provider_cache() -> None:
     @router.on("GET", "/domains")
     def domains(request):
         calls["n"] += 1
-        return json_response(200, {"hydra:member": [{"id": "u1", "domain": "x.tm", "isActive": True}]})
+        return json_response(
+            200, {"hydra:member": [{"id": "u1", "domain": "x.tm", "isActive": True}]}
+        )
 
     provider = get_provider(
         "mailtm",

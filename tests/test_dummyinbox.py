@@ -14,7 +14,6 @@ from __future__ import annotations
 import pytest
 
 from multitempmail import get_provider
-from multitempmail.errors import UnsupportedFeature
 from tests.conftest import Router, json_response, make_http
 
 DOMAINS = ["dummyinbox.com", "987654320.xyz", "dotmail.dev", "223190.xyz"]
@@ -130,20 +129,25 @@ def test_messages_maps_summaries(provider, router: Router):
 
     @router.on("GET", "/api/v1/inboxes/a@dummyinbox.com/messages")
     def messages(request):
-        return json_response(200, {
-            "messages": [{
-                "id": "6716c0e2a4b9f3d1c8e5a702",
-                "from": "hello@example.com",
-                "fromName": "Example App",
-                "to": ["a@dummyinbox.com"],
-                "cc": [],
-                "subject": "Your code",
-                "snippet": "Your verification code is 482913.",
-                "receivedAt": "2026-10-21T09:41:07.000Z",
-                "attachmentCount": 1,
-            }],
-            "total": 1,
-        })
+        return json_response(
+            200,
+            {
+                "messages": [
+                    {
+                        "id": "6716c0e2a4b9f3d1c8e5a702",
+                        "from": "hello@example.com",
+                        "fromName": "Example App",
+                        "to": ["a@dummyinbox.com"],
+                        "cc": [],
+                        "subject": "Your code",
+                        "snippet": "Your verification code is 482913.",
+                        "receivedAt": "2026-10-21T09:41:07.000Z",
+                        "attachmentCount": 1,
+                    }
+                ],
+                "total": 1,
+            },
+        )
 
     mailbox = provider.attach("a@dummyinbox.com")
     msgs = provider.messages(mailbox)
@@ -162,16 +166,23 @@ def test_message_maps_bodies_and_attachments(provider, router: Router):
 
     @router.on("GET", "/api/v1/inboxes/a@dummyinbox.com/messages/msg1")
     def message(request):
-        return json_response(200, {"message": {
-            "id": "msg1",
-            "from": "no-reply@example.com",
-            "to": ["a@dummyinbox.com"],
-            "subject": "Welcome",
-            "text": "plain body",
-            "html": "<p>html body</p>",
-            "receivedAt": "2026-10-21T09:41:07.000Z",
-            "attachments": [{"filename": "f.pdf", "contentType": "application/pdf", "size": 1234}],
-        }})
+        return json_response(
+            200,
+            {
+                "message": {
+                    "id": "msg1",
+                    "from": "no-reply@example.com",
+                    "to": ["a@dummyinbox.com"],
+                    "subject": "Welcome",
+                    "text": "plain body",
+                    "html": "<p>html body</p>",
+                    "receivedAt": "2026-10-21T09:41:07.000Z",
+                    "attachments": [
+                        {"filename": "f.pdf", "contentType": "application/pdf", "size": 1234}
+                    ],
+                }
+            },
+        )
 
     mailbox = provider.attach("a@dummyinbox.com")
     m = provider.message(mailbox, "msg1")
@@ -220,11 +231,21 @@ def test_wait_returns_arrived_messages(provider, router: Router):
 
     @router.on("GET", "/api/v1/inboxes/a@dummyinbox.com/messages")
     def messages(request):
-        return json_response(200, {"messages": [{
-            "id": "late1", "from": "x@y.z", "to": ["a@dummyinbox.com"],
-            "subject": "arrived", "snippet": "code 123456",
-            "receivedAt": "2026-10-21T09:41:07.000Z",
-        }]})
+        return json_response(
+            200,
+            {
+                "messages": [
+                    {
+                        "id": "late1",
+                        "from": "x@y.z",
+                        "to": ["a@dummyinbox.com"],
+                        "subject": "arrived",
+                        "snippet": "code 123456",
+                        "receivedAt": "2026-10-21T09:41:07.000Z",
+                    }
+                ]
+            },
+        )
 
     out = provider.wait(provider.attach("a@dummyinbox.com"), timeout=5)
     assert len(out) == 1 and out[0].subject == "arrived"
@@ -233,6 +254,5 @@ def test_wait_returns_arrived_messages(provider, router: Router):
 def test_unsupported_capabilities_raise(provider, router: Router):
     """No documented delete/mark-read endpoint, so those must raise cleanly."""
     _domains_route(router)
-    mailbox = provider.attach("a@dummyinbox.com")
     for cap in ("delete_message", "delete_mailbox", "mark_read", "attachments"):
         assert not provider.supports(cap), f"{cap} must not be declared"

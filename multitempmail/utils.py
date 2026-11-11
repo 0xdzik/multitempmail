@@ -149,9 +149,7 @@ def random_local_part(
 
 #: a DNS-style domain: at least one dot, RFC-1123 labels, 253 chars max
 _DOMAIN_RE = re.compile(
-    r"^(?=.{1,253}$)"
-    r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+"
-    r"[a-z]{2,63}$"
+    r"^(?=.{1,253}$)" r"(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+" r"[a-z]{2,63}$"
 )
 
 #: the local part of an address: 1-64 chars of alnum plus . _ - %
@@ -168,11 +166,9 @@ def is_valid_domain(domain: object) -> bool:
     value = domain.strip().lower()
     if not value or len(value) > DOMAIN_MAX:
         return False
-    if not _DOMAIN_RE.fullmatch(value):
-        return False
-    # A label may not start or end with a hyphen (covered by the regex) and
-    # the whole name may not contain an empty label (the regex rejects "..").
-    return True
+    # The regex already rejects a label that starts/ends with a hyphen and any
+    # empty label, so a full match is the whole check.
+    return bool(_DOMAIN_RE.fullmatch(value))
 
 
 def is_valid_local_part(local: object) -> bool:
@@ -188,9 +184,7 @@ def is_valid_local_part(local: object) -> bool:
         return False
     if not _LOCAL_RE.fullmatch(local):
         return False
-    if ".." in local:
-        return False
-    return True
+    return ".." not in local
 
 
 def validate_domain(domain: object, allowed: tuple[str, ...] | list[str] | None = None) -> str:
@@ -200,9 +194,7 @@ def validate_domain(domain: object, allowed: tuple[str, ...] | list[str] | None 
     the error names every accepted value so the caller can recover.
     """
     if not is_valid_domain(domain):
-        raise ValueError(
-            f"invalid domain {domain!r}: expected a DNS name such as 'example.com'"
-        )
+        raise ValueError(f"invalid domain {domain!r}: expected a DNS name such as 'example.com'")
     value = str(domain).strip().lower()
     if allowed:
         permitted = tuple(a.strip().lower() for a in allowed)
@@ -253,7 +245,7 @@ def parse_dt(value: object) -> datetime | None:
         except ValueError:
             try:
                 # naive fallback; normalized to UTC below (noqa: DTZ007)
-                dt = datetime.strptime(text, "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
+                dt = datetime.strptime(text, "%Y-%m-%d %H:%M:%S")
             except ValueError:
                 return None
         if dt.tzinfo is None:

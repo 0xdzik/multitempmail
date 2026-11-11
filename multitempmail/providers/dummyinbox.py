@@ -28,7 +28,7 @@ documented, so those capabilities are not declared.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 from ..base import BaseProvider, register
 from ..caps import Cap
@@ -56,12 +56,11 @@ class DummyInboxProvider(BaseProvider):
     # server-side wait. Sits just below catchmail because every create() is a
     # network round-trip and messages vanish after 48 h.
     default_priority = 95
-    #: filled from ``GET /domains`` on first use
-    known_domains: tuple[str, ...] = ()
+    #: empty by design — the live list comes from ``GET /domains`` and is
+    #: cached per instance in ``_domains_cache``
+    known_domains: ClassVar[tuple[str, ...]] = ()
     cache_messages = False
-    capabilities = frozenset(
-        {Cap.CREATE, Cap.LIST, Cap.READ, Cap.SERVER_WAIT, Cap.DOMAIN_SELECT}
-    )
+    capabilities = frozenset({Cap.CREATE, Cap.LIST, Cap.READ, Cap.SERVER_WAIT, Cap.DOMAIN_SELECT})
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -114,8 +113,7 @@ class DummyInboxProvider(BaseProvider):
             norm = str(chosen).strip().lower()
             if norm not in available:
                 raise ValueError(
-                    f"unsupported domain {chosen!r}: allowed domains are "
-                    f"{', '.join(available)}"
+                    f"unsupported domain {chosen!r}: allowed domains are " f"{', '.join(available)}"
                 )
             chosen = norm
 
@@ -146,16 +144,12 @@ class DummyInboxProvider(BaseProvider):
 
     def messages(self, mailbox: Mailbox) -> list[Message]:
         """List message summaries, newest first."""
-        data = self._request(
-            "GET", f"/inboxes/{mailbox.address}/messages"
-        ).json()
+        data = self._request("GET", f"/inboxes/{mailbox.address}/messages").json()
         return [self._map_summary(item) for item in (data.get("messages") or [])]
 
     def message(self, mailbox: Mailbox, message_id: str) -> Message:
         """Fetch one full message (bodies, attachments, raw source)."""
-        data = self._request(
-            "GET", f"/inboxes/{mailbox.address}/messages/{message_id}"
-        ).json()
+        data = self._request("GET", f"/inboxes/{mailbox.address}/messages/{message_id}").json()
         return self._map_full(data.get("message") or {})
 
     def wait(self, mailbox: Mailbox, timeout: float = 30.0) -> list[Message]:
