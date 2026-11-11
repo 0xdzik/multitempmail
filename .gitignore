@@ -28,3 +28,11 @@ session.json
 .opencode/
 .playwright-mcp/
 list.txt
+
+# ---------------------------------------------------------------- local only
+# Provider health probes and their captured output. These are throwaway
+# diagnostics for checking which temp-mail services are alive today, not part
+# of the library — the real test suite lives in tests/ and IS committed.
+probe_*.py
+probe_*_result.json
+HEALTH-REPORT.md
